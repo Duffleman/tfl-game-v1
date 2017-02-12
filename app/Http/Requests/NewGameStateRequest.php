@@ -24,7 +24,7 @@ class NewGameStateRequest extends FormRequest
     public function rules()
     {
         return [
-            'player' => 'string',
+            'player' => '',
         ];
     }
 }
