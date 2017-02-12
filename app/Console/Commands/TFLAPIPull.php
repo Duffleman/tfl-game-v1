@@ -42,15 +42,55 @@ class TFLAPIPull extends Command
      */
     public function handle()
     {
+        $this->clean();
+
         $stations = [];
+        $this->info('Grabbing list of lines.');
         $lines = $this->api->listLines();
 
         foreach ($lines as $line) {
-            $stations = $this->api->listStations($line['id']);
+            \TFLGame\Line::create([
+                'code' => $line['id'],
+                'name' => $line['name'],
+                'type' => $line['mode'],
+            ]);
 
+            $this->info("Grabbing station list for the ${line['id']} line.");
+            $stations[$line['id']] = $this->api->listStations($line['id']);
+        }
+
+        $lines = \TFLGame\Line::all();
+        $dict = [];
+
+        foreach ($lines as $line) {
+            $dictLines[$line->code] = $line;
+        }
+
+        foreach ($stations as $line => $stations) {
             foreach ($stations as $station) {
-                var_dump($station);
+                $db = \TFLGame\Station::firstOrCreate([
+                    'cleanName' => $station['cleanName'],
+                    'shortName' => $station['shortName'],
+                ]);
+
+                if (empty($db->longName)) {
+                    $db->longName = $station['longName'];
+
+                    $db->save();
+                }
+
+                $dbLine = $dictLines[$line];
+
+                $db->lines()->attach($dbLine);
             }
         }
+    }
+
+    private function clean() {
+        $this->info('Wiping existing data.');
+
+        \DB::table('lines')->truncate();
+        \DB::table('stations')->truncate();
+        \DB::table('line_station')->truncate();
     }
 }
