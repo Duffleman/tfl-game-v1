@@ -44,7 +44,17 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        $message = $exception->getMessage();
+
+        if (empty($message)) {
+            $reflect = new \ReflectionClass($exception);
+            $message = $reflect->getShortName();
+        }
+        $message = camelCase($message);
+
+        return response()->json(['code' => $message], 500);
+
+        // return parent::render($request, $exception);
     }
 
     /**
@@ -62,4 +72,14 @@ class Handler extends ExceptionHandler
 
         return redirect()->guest('login');
     }
+}
+
+function camelCase($input)
+{
+    preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
+    $ret = $matches[0];
+    foreach ($ret as &$match) {
+        $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+    }
+    return implode('_', $ret);
 }

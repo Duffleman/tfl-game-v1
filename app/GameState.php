@@ -9,11 +9,18 @@ class GameState extends Model
     protected $fillable = ['code', 'player'];
     protected $hidden = ['id', 'updated_at'];
 
-    public function questions() {
-    	return $this->hasMany(Question::class);
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
     }
 
-    public function getRouteKeyName() {
-	    return 'code';
-	}
+    public function latestQuestion()
+    {
+        return $this->questions()->whereNull('answered_at')->first();
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'code';
+    }
 }
