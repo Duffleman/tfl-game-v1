@@ -60,11 +60,7 @@ class TFLAPIPull extends Command
         }
 
         $lines = \TFLGame\Line::all();
-        $dict = [];
-
-        foreach ($lines as $line) {
-            $dictLines[$line->code] = $line;
-        }
+        $dictLines = $lines->keyBy('code');
 
         foreach ($stations as $line => $stations) {
             foreach ($stations as $station) {
