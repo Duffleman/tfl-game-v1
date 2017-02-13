@@ -25,28 +25,6 @@ class GameStateController extends Controller
         ];
     }
 
-    public function uwotm8(GameState $state)
-    {
-        $answered = $state->questions()->orderBy('created_at')->get();
-
-        return $answered->map(function ($question) {
-            $station = Station::where('cleanName', $question->answer)->first();
-
-            $cleanName = $station->cleanName;
-            $user_answer = $question->user_answer;
-            $correct = ScoreCalculator::isCorrect($cleanName, $user_answer);
-
-            return [
-                'question' => $question->question,
-                'answer' => $station->shortName,
-                'user_answer' => $question->user_answer,
-                'correct' => $correct,
-                'name' => $station->longName,
-                'lines' => $station->lines->pluck('name'),
-            ];
-        });
-    }
-
     public function result(GameState $state)
     {
         $questions = $state->questions()->whereNull('answered_at')->orderBy('created_at')->get();

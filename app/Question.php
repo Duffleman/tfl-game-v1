@@ -3,6 +3,7 @@
 namespace TFLGame;
 
 use Illuminate\Database\Eloquent\Model;
+use TFLGame\Services\ScoreCalculator;
 
 class Question extends Model
 {
@@ -22,6 +23,14 @@ class Question extends Model
         $this->answered_at = \Carbon\Carbon::now();
 
         $this->save();
+
+        $station = Station::where('cleanName', $this->answer)->first();
+
+        return [
+            'answer' => $station->shortName,
+            'user_answer' => $answer,
+            'correct' => ScoreCalculator::isCorrect($station->cleanName, $answer),
+        ];
     }
 
     public function show()

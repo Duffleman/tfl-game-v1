@@ -6,6 +6,14 @@ html, body {
 	height: 100vh;
 	margin: 0;
 }
+#uwot {
+	height: 200px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	border: 1px solid #222;
+	padding: 10px;
+	padding-top: 0;
+}
 .full-height {
 	height: 100vh;
 }
@@ -52,4 +60,22 @@ input {
 }
 input:focus {
 	outline: none;
+}
+ul {
+	list-style:none;
+}
+li {
+	padding: 5px;
+	color: #222;
+}
+ul.desc li {
+	font-weight:bold;
+}
+.desc {
+	color: #222;
+	font-weight: bold;
+}
+li.correct {
+	font-weight:bold;
+	color: green !important;
 }

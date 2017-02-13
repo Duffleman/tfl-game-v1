@@ -11,11 +11,38 @@
 	<body>
 		<div id="app" class="flex-center position-ref full-height">
 			<div class="content">
-				<div class="title m-b-md">@{{ question }}</div>
+				<div v-cloak class="title m-b-md">@{{ question }}</div>
 
 				<p v-show="!active">Guess the name of the TFL Station</p>
 				<div v-show="active">
-					<input type="text" v-model="userAnswer">
+					<input type="text" autofocus v-model="userAnswer" v-on:keyup.enter="submitAnswer">
+				</div>
+
+				<h2 v-show="!active && end">Congratulations... You scored @{{ score }} of @{{ questionCount }}!</h2>
+
+				<div v-show="answered">
+					<ul class="previousAnswers">
+						<li v-for="qs in previous" v-bind:class="{ 'correct' : qs.correct }">@{{ qs.answer }}</li>
+					</ul>
+				</div>
+
+				<div v-show="uwotm8.length >= 1" id="uwot">
+					<h3 style="margin-top:0;">u wot m8?</h3>
+					<p>Haha, I guess you couldn't find that one and it shocked you that it existed?</p>
+					<ul class="desc">
+						<li v-for="stns in uwotm8">
+							You were given: @{{ stns.question}}<br>
+							You said: @{{ stns.user_answer }}<br>
+							The full name of the station is: @{{ stns.name }}.<br>
+							<span v-show="stns.correct">You got it right though!</span>
+							<span v-show="!stns.correct">Not suprised you didn't get that one ;)</span>
+							<br>
+							Odd one? It's on the following lines:<br>
+							<ul class="desc">
+								<li v-for="line in stns.lines">@{{ line }}</li>
+							</ul>
+						</li>
+					</ul>
 				</div>
 			</div>
 		</div>
