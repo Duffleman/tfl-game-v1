@@ -48,12 +48,6 @@ new Vue({
 
 			this.uwotm8 = [];
 
-			if (this.previous.length >= this.total) {
-				this.getScore();
-
-				return;
-			}
-
 			if (ans === '' || ans === ' ')
 				return;
 
@@ -87,6 +81,12 @@ new Vue({
 				this.userAnswer = '';
 				this.getQuestion();
 			}).catch(console.warn);
+
+			if (this.previous.length >= this.total) {
+				this.getScore();
+
+				return;
+			}
 		},
 
 		getScore: function() {
