@@ -41,6 +41,7 @@
 							<ul class="desc">
 								<li v-for="line in stns.lines">@{{ line }}</li>
 							</ul>
+							<hr>
 						</li>
 					</ul>
 				</div>
