@@ -28,12 +28,6 @@ class ClearGames extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $env = config('app.env');
-
-        if ($env !== 'local') {
-        	throw new \Exception('cannot_clear_outside_of_local_env');
-        }
     }
 
     /**
@@ -43,6 +37,12 @@ class ClearGames extends Command
      */
     public function handle()
     {
+        $env = config('app.env');
+
+        if ($env !== 'local') {
+            throw new \Exception('cannot_clear_outside_of_local_env');
+        }
+
         return $this->clean();
     }
 
