@@ -11,7 +11,7 @@ use TFLGame\Services\GameController;
 
 class QuestionController extends Controller
 {
-    public function getName(GameState $state)
+    public function getQuestion(GameState $state)
     {
         $answered = Question::where('game_state_id', $state->id)
                     ->whereNotNull('answered_at')
@@ -29,13 +29,25 @@ class QuestionController extends Controller
             return $existing->show();
         }
 
-        $question = GameController::getName($answered);
+        $question = GameController::getName($state, $answered);
 
         return Question::create([
             'game_state_id' => $state->id,
             'question' => $question['question'],
             'answer' => $question['answer'],
         ])->show();
+    }
+
+    public function help(GameState $state) {
+        $existing = Question::where('game_state_id', $state->id)
+                    ->whereNull('answered_at')
+                    ->first();
+
+        $station = Station::where('cleanName', $existing->answer)->first();
+
+        return [
+            'lines' => $station->lines->pluck('name'),
+        ];
     }
 
     public function answer(GameState $state, Requests\AnswerRequest $request)

@@ -30,6 +30,8 @@ class Question extends Model
             'answer' => $station->shortName,
             'user_answer' => $answer,
             'correct' => ScoreCalculator::isCorrect($station->cleanName, $answer),
+            'lines' => $station->lines->pluck('name'),
+            'given' => $this->question,
         ];
     }
 

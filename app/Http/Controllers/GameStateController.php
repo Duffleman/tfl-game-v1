@@ -16,6 +16,8 @@ class GameStateController extends Controller
         $state = GameState::create($request->all());
         $hasher = new Hashids(config('app.key'));
 
+        $state->lines()->attach($request->lines);
+
         $state->code = $hasher->encode($state->id);
         $state->save();
 

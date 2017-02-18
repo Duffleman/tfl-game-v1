@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'TFLGame\Console\Commands\TFLAPIPull',
+        'TFLGame\Console\Commands\ClearGames',
     ];
 
     /**

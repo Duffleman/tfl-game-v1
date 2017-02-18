@@ -1,104 +1,139 @@
-new Vue({
+var difficulties = {
+	easy: [2, 3, 4, 6, 7, 10, 14],
+	medium: [1, 2, 3, 4, 6, 7, 9, 10, 11, 13, 14],
+};
 
+var v = new Vue({
 	el: '#app',
 
 	data: {
-		question: 'TFL Game',
-		playerName: null,
-		userAnswer: '',
-		gameState: '',
-		active: true,
-		end: false,
-		answered: false,
-		previous: [],
-		total: 20,
-		questionCount: 0,
-		score: 0,
-		uwotm8: [],
+		selectedLines: [],
+		allLines: [],
+		player: '',
+		preGame: true,
+		maxQuestions: 20,
+		gameOver: false,
+		code: '',
+		myAnswer: '',
+		answers: [],
+		help: [],
+		question: '...Loading...',
 	},
 
-	created: function() {
-		this.startGame();
+	created() {
+		this.$http.get('/api/lines').then(resp => {
+			var body = resp.body;
+
+			this.allLines = body;
+			this.selectedLines = body.map(function(l) { return l.id });
+		}).catch(console.warn);
+	},
+
+	computed: {
+		progress() {
+			return (this.answers.length / this.maxQuestions) * 100;
+		},
+
+		correct() {
+			var correct = 0;
+
+			this.answers.map(function(ans) {
+				if (ans.correct)
+					correct++;
+			});
+
+			return correct;
+		},
+
+		correctPercent() {
+			if (this.answers.length === 0) return 0;
+
+			return ((this.correct / this.answers.length) * 100).toFixed(0);
+		},
 	},
 
 	methods: {
-		startGame: function() {
-			this.$http.post('/api/gamestate', { player: this.playerName }).then(res => {
-				var body = res.body;
+		setDifficulty(s) {
+			if (s === 'hard') {
+				this.selectedLines = this.allLines.map(function(l) { return l.id });
 
-				this.gameState = body.code;
-				this.active = true;
+				return;
+			}
 
+			var diff = difficulties[s];
+
+			if (!diff)
+				return;
+
+			this.selectedLines = diff;
+		},
+
+		newGameState() {
+			this.answers = [];
+			this.preGame = false;
+			this.gameOver = false;
+			this.$http.post('/api/gamestate', { player: this.player, lines: this.selectedLines }).then(resp => {
+				var body = resp.body;
+
+				console.info('Gamestate created: ' + body.code);
+
+				this.code = body.code;
 				this.getQuestion();
 			}).catch(console.warn);
 		},
 
-		getQuestion: function() {
-			this.uwotm8 = [];
+		getQuestion() {
+			var url = '/api/question/' + this.code;
 
-			this.$http.get('/api/question/' + this.gameState).then(res => {
-				var body = res.body;
+			this.$http.get(url).then(resp => {
+				var body = resp.body;
 
 				this.question = body.question;
 			}).catch(console.warn);
 		},
 
-		submitAnswer: function() {
-			var ans = this.userAnswer;
+		getHelp() {
+			var url = '/api/help/' + this.code;
 
-			this.uwotm8 = [];
+			this.$http.get(url).then(resp => {
+				var body = resp.body;
 
-			if (ans === '' || ans === ' ')
-				return;
-
-			if (ans === 'uwotm8') {
-				this.$http.get('/api/uwotm8/' + this.gameState).then(res => {
-					var body = res.body;
-
-					this.uwotm8 = body;
-				}).catch(console.warn);
-
-				return;
-			}
-
-			if (ans === 'result') {
-				this.getScore();
-
-				return;
-			}
-
-			this.$http.post('/api/answer/' + this.gameState, {
-				answer: ans,
-			}).then(res => {
-				var body = res.body;
-
-				this.answered = true;
-				this.previous.unshift({
-					answer: body.answer,
-					given: ans,
-					correct: body.correct,
-				});
-				this.userAnswer = '';
-				this.getQuestion();
+				this.help = body.lines;
 			}).catch(console.warn);
-
-			if (this.previous.length >= this.total) {
-				this.getScore();
-
-				return;
-			}
 		},
 
-		getScore: function() {
-			this.$http.get('/api/result/' + this.gameState).then(res => {
-				var body = res.body;
+		submitAnswer() {
+			var url = '/api/answer/' + this.code;
+			var answer = this.myAnswer;
+			this.myAnswer = '';
+			this.help = [];
 
-				this.score = body.score;
-				this.questionCount = body.questions.length;
-				this.end = true;
-				this.active = false;
-				this.question = 'TFL Game';
+			if (answer === 'help') {
+				this.getHelp();
+
+				return;
+			}
+
+			if (answer === 'restart') {
+				this.newGameState();
+
+				return;
+			}
+
+			this.$http.post(url, { answer: answer }).then(resp => {
+				var body = resp.body;
+
+				console.info('Answer submitted: ' + answer);
+
+				this.answers.unshift(body);
+
+				if (this.answers.length < 20) {
+					this.getQuestion();
+				} else {
+					this.gameOver = true;
+					this.question = '...';
+				}
 			}).catch(console.warn);
-		}
-	}
+		},
+	},
 });

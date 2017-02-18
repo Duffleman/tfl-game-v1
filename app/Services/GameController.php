@@ -3,17 +3,23 @@
 namespace TFLGame\Services;
 
 use TFLGame\Station;
+use TFLGame\GameState;
 
 class GameController
 {
-    public static function getName($answered) {
-        $alreadyGiven = [];
+    public static function getName(GameState $state, $answered) {
+        $alreadyGiven = $answered->map(function ($ans) {
+            return $ans->answer;
+        });
 
-        foreach ($answered as $ans) {
-            $alreadyGiven[] = $ans->answer;
-        }
+        $lines = $state->lines()->get()->pluck('id')->toArray();
 
-        $station = Station::whereNotIn('cleanName', $alreadyGiven)->get()->random();
+        $station = Station::whereNotIn('cleanName', $alreadyGiven)
+            ->whereHas('lines', function($query) use($lines) {
+                $query->whereIn('line_id', $lines);
+            })
+            ->get()
+            ->random();
 
         $space = ' ';
         $text = preg_replace("/[AEIOU12345]/", "", $station->cleanName);
