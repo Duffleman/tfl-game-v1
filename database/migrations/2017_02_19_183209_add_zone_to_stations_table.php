@@ -14,7 +14,7 @@ class AddZoneToStationsTable extends Migration
     public function up()
     {
         Schema::table('stations', function (Blueprint $table) {
-            $table->integer('zone')->nullable()->after('cleanName');
+            $table->string('zone')->nullable()->after('cleanName');
         });
     }
 
