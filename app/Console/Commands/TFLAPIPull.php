@@ -67,6 +67,7 @@ class TFLAPIPull extends Command
                 $db = \TFLGame\Station::firstOrCreate([
                     'cleanName' => $station['cleanName'],
                     'shortName' => $station['shortName'],
+                    'zone' => $station['zone'],
                 ]);
 
                 if (empty($db->longName)) {
