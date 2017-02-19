@@ -36,7 +36,7 @@
 							<div style="margin-top:1rem;">
 								<button class="button" @click="setDifficulty('easy')">Easy</button>
 								<button class="button" @click="setDifficulty('medium')">Medium</button>
-								<button class="button" @click="setDifficulty('hard')">Hard</button>
+								<button class="button" @click="setDifficulty('all')">Hard</button>
 							</div>
 						</div>
 					</div>

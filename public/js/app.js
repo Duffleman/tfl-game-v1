@@ -25,7 +25,7 @@ var v = new Vue({
 			var body = resp.body;
 
 			this.allLines = body;
-			this.selectedLines = body.map(function(l) { return l.id });
+			this.selectedLines = difficulties['medium'];
 		}).catch(console.warn);
 	},
 
@@ -54,7 +54,7 @@ var v = new Vue({
 
 	methods: {
 		setDifficulty(s) {
-			if (s === 'hard') {
+			if (s === 'all') {
 				this.selectedLines = this.allLines.map(function(l) { return l.id });
 
 				return;
