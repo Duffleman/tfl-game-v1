@@ -14,7 +14,7 @@ class AddStationIdColumn extends Migration
     public function up()
     {
         Schema::table('stations', function (Blueprint $table) {
-            $table->string('tflId')->nullable()->unique()->after('id');
+            $table->string('tflId', 50)->nullable()->unique()->after('id');
         });
     }
 
