@@ -68,6 +68,7 @@
 										<th>Question</th>
 										<th>Given</th>
 										<th>Answer</th>
+										<th>Zone</th>
 										<th>Correct</th>
 										<th>Lines</th>
 									</tr>
@@ -77,6 +78,7 @@
 										<td>@{{ answer.given }}</td>
 										<td>@{{ answer.user_answer }}</td>
 										<td>@{{ answer.answer }}</td>
+										<td>@{{ answer.zone }}</td>
 										<td>
 											<span v-show="answer.correct" class="tag is-success">&nbsp;</span>
 											<span v-show="!answer.correct" class="tag is-danger">&nbsp;</span>
@@ -86,7 +88,7 @@
 								</tbody>
 								<tfoot>
 									<tr>
-										<td colspan="3"></td>
+										<td colspan="4"></td>
 										<td><strong>@{{ correct }} / @{{ answers.length }}<br>@{{ correctPercent }}%</strong></td>
 										<td></td>
 									</tr>
