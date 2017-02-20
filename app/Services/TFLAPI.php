@@ -71,6 +71,15 @@ class TFLAPI
                 $zone = $zoneProperty->first()['value'];
             }
 
+            // Weird Overrides
+            if ($station->id === '910GBUSHYDC') { // Bushey -> 8
+                $zone = '8';
+            }
+
+            if ($station->id === '910GCLPHMJ1') { // Clapham Junction -> 2
+                $zone = '2';
+            }
+
             $stations[] = [
                 'id' => $station->id,
                 'line' => $line,

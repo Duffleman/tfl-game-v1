@@ -84,7 +84,8 @@ class TFLAPIPull extends Command
         }
     }
 
-    private function clean() {
+    private function clean()
+    {
         $this->info('Wiping existing data.');
 
         \DB::table('lines')->truncate();
