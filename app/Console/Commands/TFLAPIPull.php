@@ -65,6 +65,7 @@ class TFLAPIPull extends Command
         foreach ($stations as $line => $stations) {
             foreach ($stations as $station) {
                 $db = \TFLGame\Station::firstOrCreate([
+                    'tflId' => $station['id'],
                     'cleanName' => $station['cleanName'],
                     'shortName' => $station['shortName'],
                     'zone' => $station['zone'],

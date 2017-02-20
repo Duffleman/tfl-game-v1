@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Station extends Model
 {
-    protected $fillable = ['longName', 'shortName', 'cleanName', 'zone'];
+    protected $fillable = ['tflId', 'longName', 'shortName', 'cleanName', 'zone'];
 
     public function lines()
     {
