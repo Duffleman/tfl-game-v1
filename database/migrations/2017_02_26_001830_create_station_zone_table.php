@@ -17,7 +17,7 @@ class CreateStationZoneTable extends Migration
             station_id INTEGER NOT NULL,
             zone_id INTEGER NOT NULL,
 
-            PRIMARY KEY (line_id, zone_id)
+            PRIMARY KEY (station_id, zone_id)
         );';
 
         \DB::statement($stmt);
