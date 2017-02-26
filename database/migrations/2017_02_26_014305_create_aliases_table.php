@@ -19,8 +19,6 @@ class CreateAliasesTable extends Migration
             $table->string('tflId', 50)->nullable();
             $table->string('name');
             $table->timestamps();
-
-            $table->foreign('station_id')->references('id')->on('stations');
         });
     }
 

@@ -18,9 +18,6 @@ class CreateLineStationTable extends Migration
             $table->integer('station_id');
 
             $table->primary(['line_id', 'station_id']);
-
-            $table->foreign('station_id')->references('id')->on('stations');
-            $table->foreign('line_id')->references('id')->on('lines');
         });
     }
 

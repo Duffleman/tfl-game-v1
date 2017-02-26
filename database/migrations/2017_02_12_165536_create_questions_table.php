@@ -22,9 +22,6 @@ class CreateQuestionsTable extends Migration
             $table->string('user_answer')->nullable();
             $table->datetime('answered_at')->nullable();
             $table->timestamps();
-
-            $table->foreign('game_state_id')->references('id')->on('game_states');
-            $table->foreign('station_id')->references('id')->on('stations');
         });
     }
 

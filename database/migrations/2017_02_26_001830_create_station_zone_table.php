@@ -18,9 +18,6 @@ class CreateStationZoneTable extends Migration
             $table->integer('zone_id');
 
             $table->primary(['station_id', 'zone_id']);
-
-            $table->foreign('station_id')->references('id')->on('stations');
-            $table->foreign('zone_id')->references('id')->on('zones');
         });
     }
 
