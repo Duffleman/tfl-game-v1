@@ -17,7 +17,7 @@ class CreateGameStatesTable extends Migration
             $table->increments('id');
             $table->string('code')->nullable();
             $table->string('player')->nullable();
-            $table->json('config');
+            $table->string('config');
             $table->timestamps();
         });
     }
