@@ -13,7 +13,14 @@ class CreateStationZoneTable extends Migration
      */
     public function up()
     {
-        \DB::statement('create table "station_zone" ("station_id" integer not null, "zone_id" integer not null, primary key ("station_id", "zone_id"))');
+        $stmt = 'CREATE TABLE station_zone (
+            station_id INTEGER NOT NULL,
+            zone_id INTEGER NOT NULL,
+
+            PRIMARY KEY (line_id, zone_id)
+        );';
+
+        \DB::statement($stmt);
     }
 
     /**
