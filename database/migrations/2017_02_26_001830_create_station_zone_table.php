@@ -14,8 +14,8 @@ class CreateStationZoneTable extends Migration
     public function up()
     {
         Schema::create('station_zone', function (Blueprint $table) {
-            $table->integer('station_id');
-            $table->integer('zone_id');
+            $table->integer('station_id', 10);
+            $table->integer('zone_id', 10);
 
             $table->primary(['station_id', 'zone_id']);
         });
