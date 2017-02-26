@@ -3,7 +3,6 @@
 namespace TFLGame\Http\Controllers;
 
 use Illuminate\Http\Request;
-use TFLGame\Http\Requests;
 use TFLGame\GameState;
 use TFLGame\Station;
 use TFLGame\Services\ScoreCalculator;
@@ -11,12 +10,33 @@ use Hashids\Hashids;
 
 class GameStateController extends Controller
 {
-    public function create(Requests\NewGameStateRequest $request)
+    public function create(Request $request)
     {
-        $state = GameState::create($request->all());
-        $hasher = new Hashids(config('app.key'));
+        $this->validateNewGameRequest($request);
 
-        $state->lines()->attach($request->lines);
+        $state = GameState::create([
+            'player' => $request->player,
+            'config' => $request->config,
+        ]);
+
+        $lines = $request->config['lines'];
+        $zones = $request->config['zones'];
+
+        $answerPool = Station::whereHas('lines', function ($query) use ($lines) {
+                $query->whereIn('code', $lines);
+            })
+            ->whereHas('zones', function ($query) use ($zones) {
+                $query->whereIn('label', $zones);
+            })
+            ->count();
+
+        $minQuestions = config('game.question_count');
+
+        if ($answerPool < $minQuestions) {
+            throw new \Exception('params_wont_allow_game');
+        }
+
+        $hasher = new Hashids(config('app.key'));
 
         $state->code = $hasher->encode($state->id);
         $state->save();
@@ -24,12 +44,47 @@ class GameStateController extends Controller
         return [
             'code' => $state->code,
             'player' => $state->player,
+            'config' => $state->config,
+            'pool' => $answerPool,
         ];
+    }
+
+    private function validateNewGameRequest(Request $request) {
+        $rules = [];
+
+        $this->validate($request, [
+            'player' => '',
+            'config' => 'required',
+            'config.lines' => 'array|min:1',
+            'config.zones' => 'array|min:1',
+        ]);
+
+        foreach ($request->config['lines'] as $i => $line) {
+            $rules["config.lines.${i}"] = 'string|exists:lines,code';
+        }
+
+        foreach ($request->config['zones'] as $i => $line) {
+            $rules["config.zones.${i}"] = 'exists:zones,label';
+        }
+
+        $this->validate($request, $rules);
+    }
+
+    public function getQuestion(GameState $state) {
+        try {
+            return $state->latestQuestion();
+        } catch (\Exception $ex) {
+            if ($ex->getMessage() !== 'no_question_assigned')
+                throw $ex;
+
+            return null;
+        }
     }
 
     public function result(GameState $state)
     {
-        $questions = $state->questions()->whereNull('answered_at')->orderBy('created_at')->get();
+        $question = $this->getQuestion($state);
+
         $answered = $state->questions()->whereNotNull('answered_at')->orderBy('created_at')->get();
         $progress = 'created';
 
@@ -41,14 +96,20 @@ class GameStateController extends Controller
             $progress = 'complete';
         }
 
-        $score = ScoreCalculator::calculate($state, $answered);
+        $stationIds = $answered->map(function ($question) {
+            return $question->station_id;
+        });
+
+        $stations = Station::whereIn('id', $stationIds)->get();
+        $stations = $stations->keyBy('id');
+
+        $score = ScoreCalculator::calculate($state, $answered, $stations);
 
         return [
             'player' => $state->player,
-            'started_at' => $state->created_at->toDayDateTimeString(),
+            'started_at' => $state->created_at->toIso8601String(),
             'state' => $progress,
-            'question_waiting' => $questions->count() === 1 ? true : false,
-            'questions' => $answered->pluck('question'),
+            'question_waiting' => $question ? true : false,
             'score' => $score,
         ];
     }

@@ -9,13 +9,18 @@ class Question extends Model
 {
     protected $fillable = [
         'game_state_id',
+        'station_id',
         'question',
-        'answer',
     ];
 
     protected $hidden = [
-        'id', 'game_state_id', 'answer', 'user_answer', 'answered_at', 'created_at', 'updated_at',
+        'id', 'game_state_id', 'station_id', 'user_answer', 'answered_at', 'created_at', 'updated_at',
     ];
+
+    public function station()
+    {
+        return $this->hasOne(Station::class);
+    }
 
     public function answer($answer)
     {
@@ -24,26 +29,15 @@ class Question extends Model
 
         $this->save();
 
-        $station = Station::where('cleanName', $this->answer)->with('zones')->first();
+        $station = Station::find($this->station_id);
 
         return [
             'answer' => $station->shortName,
             'user_answer' => $answer,
             'correct' => ScoreCalculator::isCorrect($station->cleanName, $answer),
             'lines' => $station->lines->pluck('name'),
-            'zones' => $station->zones,
+            'zones' => $station->zones->pluck('label'),
             'given' => $this->question,
         ];
-    }
-
-    public function show()
-    {
-        if (!$this->answered_at) {
-            return $this;
-        }
-
-        $this->makeVisible('user_answer');
-
-        return $this;
     }
 }

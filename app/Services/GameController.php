@@ -4,24 +4,39 @@ namespace TFLGame\Services;
 
 use TFLGame\Station;
 use TFLGame\GameState;
+use Illuminate\Support\Collection;
 
 class GameController
 {
-    public static function getName(GameState $state, $answered)
+    public static function getStation(GameState $state, Collection $stationsGiven)
     {
-        $alreadyGiven = $answered->map(function ($ans) {
-            return $ans->answer;
+        $alreadyGiven = $stationsGiven->map(function ($station) {
+            return $station->id;
         });
 
-        $lines = $state->lines()->get()->pluck('id')->toArray();
+        $config = $state->config;
 
-        $station = Station::whereNotIn('cleanName', $alreadyGiven)
+        $lines = $config['lines'];
+        $zones = $config['zones'];
+
+        $station = Station::whereNotIn('id', $alreadyGiven)
             ->whereHas('lines', function ($query) use ($lines) {
-                $query->whereIn('line_id', $lines);
+                $query->whereIn('code', $lines);
+            })
+            ->whereHas('zones', function ($query) use ($zones) {
+                $query->whereIn('label', $zones);
             })
             ->get()
             ->random();
 
+        if ($station->count() === 0) {
+            throw new \Exception('no_stations_match_params');
+        }
+
+        return $station;
+    }
+
+    public static function generateQuestion(Station $station) {
         $space = ' ';
         $text = preg_replace("/[AEIOU]/", "", $station->cleanName);
         $text = str_replace("_", "", $text);
@@ -39,10 +54,7 @@ class GameController
         $text = trim(implode($array, ''));
         $text = preg_replace("/\s\s+/", " ", $text);
 
-        return [
-            'question' => $text,
-            'answer' => $station->cleanName,
-        ];
+        return $text;
     }
 }
 

@@ -14,15 +14,17 @@ class CreateQuestionsTable extends Migration
     public function up()
     {
         Schema::create('questions', function (Blueprint $table) {
+            // TODO: This could be a pivot table with additional attributes
             $table->increments('id');
             $table->integer('game_state_id');
+            $table->integer('station_id');
             $table->string('question');
-            $table->string('answer');
             $table->string('user_answer')->nullable();
             $table->datetime('answered_at')->nullable();
             $table->timestamps();
 
             $table->foreign('game_state_id')->references('id')->on('game_states');
+            $table->foreign('station_id')->references('id')->on('stations');
         });
     }
 
