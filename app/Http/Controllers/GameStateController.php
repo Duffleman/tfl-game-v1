@@ -88,6 +88,8 @@ class GameStateController extends Controller
         $answered = $state->questions()->whereNotNull('answered_at')->orderBy('created_at')->get();
         $progress = 'created';
 
+        $timeTaken = $answered->first()->created_at->diffForHumans($answered->last()->updated_at, true);
+
         if ($answered->count() > 0) {
             $progress = 'in-progress';
         }
@@ -110,6 +112,7 @@ class GameStateController extends Controller
             'started_at' => $state->created_at->toIso8601String(),
             'state' => $progress,
             'question_waiting' => $question ? true : false,
+            'time_taken' => $timeTaken,
             'score' => $score,
         ];
     }
