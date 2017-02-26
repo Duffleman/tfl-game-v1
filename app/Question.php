@@ -24,14 +24,14 @@ class Question extends Model
 
         $this->save();
 
-        $station = Station::where('cleanName', $this->answer)->first();
+        $station = Station::where('cleanName', $this->answer)->with('zones')->first();
 
         return [
             'answer' => $station->shortName,
             'user_answer' => $answer,
             'correct' => ScoreCalculator::isCorrect($station->cleanName, $answer),
             'lines' => $station->lines->pluck('name'),
-            'zone' => $station->zone,
+            'zones' => $station->zones,
             'given' => $this->question,
         ];
     }

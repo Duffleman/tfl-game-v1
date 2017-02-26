@@ -15,7 +15,6 @@ class CreateStationsTable extends Migration
     {
         Schema::create('stations', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('longName')->nullable();
             $table->string('shortName');
             $table->string('cleanName');
             $table->timestamps();

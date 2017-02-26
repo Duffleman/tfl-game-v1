@@ -38,7 +38,8 @@ class QuestionController extends Controller
         ])->show();
     }
 
-    public function help(GameState $state) {
+    public function help(GameState $state)
+    {
         $existing = Question::where('game_state_id', $state->id)
                     ->whereNull('answered_at')
                     ->first();
