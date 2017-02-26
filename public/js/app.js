@@ -1,14 +1,35 @@
+var baseLines = [
+	"bakerloo",
+	"central",
+	"circle",
+	"district",
+	"dlr",
+	"hammersmith-city",
+	"jubilee",
+	"metropolitan",
+	"northern",
+	"piccadilly",
+	"victoria",
+	"waterloo-city",
+];
+
 var difficulties = {
-	easy: [2, 3, 4, 6, 7, 10, 14],
-	medium: [1, 2, 3, 4, 6, 7, 9, 10, 11, 13, 14],
+	'easy': ['1', '2', '2/3'],
+	'medium': ['1', '2', '2/3', '3', '4', '5'],
+	'hard': ['1', '2', '2/3', '3', '4', '5', '6', '7', '8', '9'],
 };
 
 var v = new Vue({
 	el: '#app',
 
 	data: {
+		alert: false,
+		alertMessage: '',
 		selectedLines: [],
+		selectedZones: [],
+		chunkedLines: [],
 		allLines: [],
+		allZones: [],
 		player: '',
 		preGame: true,
 		maxQuestions: 20,
@@ -16,17 +37,37 @@ var v = new Vue({
 		code: '',
 		myAnswer: '',
 		answers: [],
-		help: [],
+		help: { lines: [], zones: [] },
 		question: '...Loading...',
+		pool: 0,
 	},
 
 	created() {
 		this.$http.get('/api/lines').then(resp => {
 			var body = resp.body;
+			var allLines = [];
 
-			this.allLines = body;
-			this.selectedLines = difficulties['medium'];
-		}).catch(console.warn);
+			body.forEach(function (chunk) {
+				chunk.forEach(function (line) {
+					allLines.push(line);
+				});
+			});
+
+			this.chunkedLines = body;
+			this.allLines = allLines;
+			this.selectedLines = baseLines;
+		}).catch(resp => {
+			alert(this, resp.body.code);
+		});
+
+		this.$http.get('/api/zones').then(resp => {
+			var body = resp.body;
+
+			this.allZones = body;
+			this.selectedZones = difficulties['medium'];
+		}).catch(resp => {
+			alert(this, resp.body.code);
+		});
 	},
 
 	computed: {
@@ -53,33 +94,39 @@ var v = new Vue({
 	},
 
 	methods: {
-		setDifficulty(s) {
-			if (s === 'all') {
-				this.selectedLines = this.allLines.map(function(l) { return l.id });
+		setDifficulty(difficulty) {
+			var diff = difficulties[difficulty];
 
-				return;
+			if (!diff) {
+				alert('missing_difficulty');
 			}
 
-			var diff = difficulties[s];
-
-			if (!diff)
-				return;
-
-			this.selectedLines = diff;
+			this.selectedZones = diff;
 		},
 
 		newGameState() {
 			this.answers = [];
 			this.preGame = false;
 			this.gameOver = false;
-			this.$http.post('/api/gamestate', { player: this.player, lines: this.selectedLines }).then(resp => {
+
+			const body = {
+				player: this.player,
+				config: {
+					lines: this.selectedLines,
+					zones: this.selectedZones,
+				},
+			};
+
+			this.$http.post('/api/gamestate', body).then(resp => {
 				var body = resp.body;
 
-				console.info('Gamestate created: ' + body.code);
-
 				this.code = body.code;
+				this.pool = body.pool;
+
 				this.getQuestion();
-			}).catch(console.warn);
+			}).catch(resp => {
+				alert(this, resp.body.code);
+			});
 		},
 
 		getQuestion() {
@@ -89,7 +136,9 @@ var v = new Vue({
 				var body = resp.body;
 
 				this.question = body.question;
-			}).catch(console.warn);
+			}).catch(resp => {
+				alert(this, resp.body.code)
+			});
 		},
 
 		getHelp() {
@@ -98,23 +147,26 @@ var v = new Vue({
 			this.$http.get(url).then(resp => {
 				var body = resp.body;
 
-				this.help = body.lines;
-			}).catch(console.warn);
+				this.help.lines = body.lines;
+				this.help.zones = body.zones;
+			}).catch(resp => {
+				alert(this, resp.body.code);
+			});
 		},
 
 		submitAnswer() {
 			var url = '/api/answer/' + this.code;
 			var answer = this.myAnswer;
 			this.myAnswer = '';
-			this.help = [];
+			this.help = { lines: [], zones: [] };
 
-			if (answer === 'help') {
+			if (answer.toLowerCase() === 'help') {
 				this.getHelp();
 
 				return;
 			}
 
-			if (answer === 'restart') {
+			if (answer.toLowerCase() === 'restart') {
 				this.newGameState();
 
 				return;
@@ -122,8 +174,6 @@ var v = new Vue({
 
 			this.$http.post(url, { answer: answer }).then(resp => {
 				var body = resp.body;
-
-				console.info('Answer submitted: ' + answer);
 
 				this.answers.unshift(body);
 
@@ -133,7 +183,16 @@ var v = new Vue({
 					this.gameOver = true;
 					this.question = '...';
 				}
-			}).catch(console.warn);
+			}).catch(resp => {
+				alert(this, resp.body.code);
+			});
 		},
 	},
 });
+
+function alert(v, code) {
+	console.warn(code);
+
+	v.alert = true;
+	v.alertMessage = code;
+}

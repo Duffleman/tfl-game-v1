@@ -46,7 +46,8 @@ class ClearGames extends Command
         return $this->clean();
     }
 
-    private function clean() {
+    private function clean()
+    {
         $this->info('Wiping existing data.');
 
         \DB::table('game_states')->truncate();

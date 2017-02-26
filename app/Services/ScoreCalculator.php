@@ -3,16 +3,18 @@
 namespace TFLGame\Services;
 
 use TFLGame\GameState;
+use Illuminate\Support\Collection;
 
 class ScoreCalculator
 {
 
-    public static function calculate(GameState $state, $questions)
+    public static function calculate(GameState $state, Collection $questions, Collection $stations)
     {
         $score = 0;
 
         foreach ($questions as $question) {
-            $answer = $question->answer;
+            $station = $stations[$question->station_id];
+            $answer = $station->cleanName;
             $user_ans = $question->user_answer;
 
             if (self::isCorrect($answer, $user_ans)) {

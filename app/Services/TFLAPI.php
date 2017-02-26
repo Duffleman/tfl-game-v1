@@ -3,14 +3,18 @@
 namespace TFLGame\Services;
 
 use Duffleman\JSONClient\JSONClient;
+use Duffleman\JSONClient\Collections\Generic;
 
 class TFLAPI
 {
 
     private static $removals = [
+        'International',
+        'London',
         'Rail Station',
         'Underground Station',
         'DLR Station',
+        '-Underground', // Weird one for Paddington
     ];
 
     public function __construct($app_id, $app_key)
@@ -30,14 +34,14 @@ class TFLAPI
         ]);
 
         foreach ($resultSet as $line) {
-            $lines[] = [
+            $lines[] = new Generic([
                 'id' => $line->id,
                 'name' => $line->name,
                 'mode' => $line->modeName,
-            ];
+            ]);
         }
 
-        return $lines;
+        return collect($lines);
     }
 
     public function listStations($line)
@@ -54,6 +58,11 @@ class TFLAPI
 
             foreach (self::$removals as $term) {
                 $shortName = str_replace($term, '', $shortName);
+            }
+
+            // One small exception
+            if (trim($shortName) === 'Bridge') {
+                $shortName = 'London Bridge';
             }
 
             $shortName = trim($shortName);
@@ -80,22 +89,24 @@ class TFLAPI
                 $zone = '2';
             }
 
-            $stations[] = [
+            $zones = explode('+', $zone);
+
+            $stations[] = new Generic([
                 'id' => $station->id,
                 'line' => $line,
                 'longName' => $station->name ?? $station->commonName,
                 'shortName' => $shortName,
                 'cleanName' => $cleanName,
-                'zone' => $zone,
+                'zones' => $zones,
                 'type' => $station->placeType,
                 'status' => $station->status,
                 'location' => [
                     'latitude' => $station->lat,
                     'longitude' => $station->lon,
                 ],
-            ];
+            ]);
         }
 
-        return $stations;
+        return collect($stations);
     }
 }

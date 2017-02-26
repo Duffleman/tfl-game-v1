@@ -8,11 +8,19 @@ use TFLGame\Line;
 class LinesController extends Controller {
 
 	public function lines() {
-		return Line::all()->map(function($line) {
+		$lines = Line::all()->map(function($line) {
 			return [
 				'id' => $line->id,
 				'name' => $line->name,
+				'code' => $line->code,
+				'mode' => $line->type,
 			];
 		});
+
+		$chunks = $lines->chunk(5)->toArray();
+
+		return array_map(function ($chunk) {
+			return array_values($chunk);
+		}, $chunks);
 	}
 }

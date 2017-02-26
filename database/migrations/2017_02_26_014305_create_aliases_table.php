@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGameStateLineTable extends Migration
+class CreateAliasesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,14 @@ class CreateGameStateLineTable extends Migration
      */
     public function up()
     {
-        Schema::create('game_state_line', function (Blueprint $table) {
+        Schema::create('aliases', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('game_state_id');
-            $table->integer('line_id');
+            $table->integer('station_id');
+            $table->string('tflId', 50)->nullable();
+            $table->string('name');
+            $table->timestamps();
+
+            $table->foreign('station_id')->references('id')->on('stations');
         });
     }
 
@@ -27,6 +31,6 @@ class CreateGameStateLineTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('game_state_line');
+        Schema::dropIfExists('aliases');
     }
 }

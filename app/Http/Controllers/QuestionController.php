@@ -26,69 +26,35 @@ class QuestionController extends Controller
                     ->first();
 
         if ($existing) {
-            return $existing->show();
+            return $existing;
         }
 
-        $question = GameController::getName($state, $answered);
+        $station = GameController::getStation($state, $answered);
+        $question = GameController::generateQuestion($station);
 
         return Question::create([
             'game_state_id' => $state->id,
-            'question' => $question['question'],
-            'answer' => $question['answer'],
-        ])->show();
+            'station_id' => $station->id,
+            'question' => $question,
+        ]);
     }
 
-    public function help(GameState $state) {
-        $existing = Question::where('game_state_id', $state->id)
-                    ->whereNull('answered_at')
-                    ->first();
-
-        $station = Station::where('cleanName', $existing->answer)->first();
+    public function help(GameState $state)
+    {
+        $question = $state->latestQuestion();
+        $station = Station::find($question->station_id);
 
         return [
+            'zones' => $station->zones->pluck('label'),
             'lines' => $station->lines->pluck('name'),
         ];
     }
 
     public function answer(GameState $state, Requests\AnswerRequest $request)
     {
-        $answered = Question::where('game_state_id', $state->id)
-                    ->whereNotNull('answered_at')
-                    ->get();
+        $question = $state->latestQuestion();
+        $answer = $question->answer($request->answer);
 
-        if ($answered->count() >= 20) {
-            throw new \Exception('game_state_finished');
-        }
-
-        try {
-            $question = $state->latestQuestion();
-            $answer = $question->answer($request->answer);
-
-            return $answer;
-        } catch (\Throwable $error) {
-            throw $error;
-        }
-    }
-
-    public function uwotm8(GameState $state)
-    {
-        $answered = $state->questions()->whereNotNull('answered_at')->orderBy('created_at')->get();
-
-        return $answered->map(function ($question) {
-            $station = Station::where('cleanName', $question->answer)->first();
-
-            $cleanName = $station->cleanName;
-            $user_answer = $question->user_answer;
-            $correct = ScoreCalculator::isCorrect($cleanName, $user_answer);
-
-            return [
-                'question' => $question->question,
-                'answer' => $station->shortName,
-                'user_answer' => $question->user_answer,
-                'correct' => $correct,
-                'name' => $station->longName,
-                'lines' => $station->lines->pluck('name'),
-            ];
-        });
+        return $answer;
     }
 }
