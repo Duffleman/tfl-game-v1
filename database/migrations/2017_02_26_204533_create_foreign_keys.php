@@ -13,24 +13,24 @@ class CreateForeignKeys extends Migration
      */
     public function up()
     {
-        Schema::table('line_station', function (Blueprint $table) {
-            $table->foreign('station_id')->references('id')->on('stations');
-            $table->foreign('line_id')->references('id')->on('lines');
-        });
+        // Schema::table('line_station', function (Blueprint $table) {
+        //     $table->foreign('station_id')->references('id')->on('stations');
+        //     $table->foreign('line_id')->references('id')->on('lines');
+        // });
 
-        Schema::table('questions', function (Blueprint $table) {
-            $table->foreign('game_state_id')->references('id')->on('game_states');
-            $table->foreign('station_id')->references('id')->on('stations');
-        });
+        // Schema::table('questions', function (Blueprint $table) {
+        //     $table->foreign('game_state_id')->references('id')->on('game_states');
+        //     $table->foreign('station_id')->references('id')->on('stations');
+        // });
 
-        Schema::table('station_zone', function (Blueprint $table) {
-            $table->foreign('station_id')->references('id')->on('stations');
-            $table->foreign('zone_id')->references('id')->on('zones');
-        });
+        // Schema::table('station_zone', function (Blueprint $table) {
+        //     $table->foreign('station_id')->references('id')->on('stations');
+        //     $table->foreign('zone_id')->references('id')->on('zones');
+        // });
 
-        Schema::table('aliases', function (Blueprint $table) {
-            $table->foreign('station_id')->references('id')->on('stations');
-        });
+        // Schema::table('aliases', function (Blueprint $table) {
+        //     $table->foreign('station_id')->references('id')->on('stations');
+        // });
     }
 
     /**
