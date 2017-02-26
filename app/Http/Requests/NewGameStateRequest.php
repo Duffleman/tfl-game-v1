@@ -25,7 +25,7 @@ class NewGameStateRequest extends FormRequest
     {
         return [
             'player' => '',
-            'lines' => 'required|array|exists:lines,id',
+            'config' => 'required|json',
         ];
     }
 }
