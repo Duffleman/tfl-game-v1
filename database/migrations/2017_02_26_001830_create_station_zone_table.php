@@ -13,12 +13,7 @@ class CreateStationZoneTable extends Migration
      */
     public function up()
     {
-        Schema::create('station_zone', function (Blueprint $table) {
-            $table->integer('station_id', 10);
-            $table->integer('zone_id', 10);
-
-            $table->primary(['station_id', 'zone_id']);
-        });
+        \DB::statement('create table "station_zone" ("station_id" integer not null, "zone_id" integer not null, primary key ("station_id", "zone_id"))');
     }
 
     /**
